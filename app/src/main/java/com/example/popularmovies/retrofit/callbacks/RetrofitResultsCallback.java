@@ -1,31 +1,25 @@
 package com.example.popularmovies.retrofit.callbacks;
 
-import com.example.popularmovies.retrofit.models.Movie;
-import com.example.popularmovies.retrofit.models.MoviesList;
-import com.example.popularmovies.retrofit.callbacks.RetrofitResult.MoviesListResult;
-
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MoviesResultsCallback implements Callback<MoviesList> {
+public class RetrofitResultsCallback<RetrofitType> implements Callback<RetrofitType> {
     private static final String ERROR_MESSAGE = "Could not get movies list";
 
-    private final MoviesListResult mMoviesListResult;
+    private final RetrofitResult<RetrofitType> mMoviesListResult;
 
-    public MoviesResultsCallback(MoviesListResult moviesListResult) {
+    public RetrofitResultsCallback(RetrofitResult<RetrofitType> moviesListResult) {
         mMoviesListResult = moviesListResult;
     }
 
     @Override
-    public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+    public void onResponse(Call<RetrofitType> call, Response<RetrofitType> response) {
         if (response.isSuccessful()) {
-            List<Movie> moviesList;
+            RetrofitType moviesList;
             if (response.body() != null) {
-                moviesList = response.body().getMovies();
-                mMoviesListResult.onMoviesListResult(moviesList);
+                moviesList = response.body();
+                mMoviesListResult.onResult(moviesList);
             } else {
                 Throwable error = new RuntimeException(ERROR_MESSAGE);
                 mMoviesListResult.onError(error);
@@ -41,7 +35,7 @@ public class MoviesResultsCallback implements Callback<MoviesList> {
     }
 
     @Override
-    public void onFailure(Call<MoviesList> call, Throwable error) {
+    public void onFailure(Call<RetrofitType> call, Throwable error) {
         mMoviesListResult.onError(error);
     }
 }

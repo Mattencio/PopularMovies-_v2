@@ -3,12 +3,13 @@ package com.example.popularmovies.retrofit;
 import android.content.Context;
 
 import com.example.popularmovies.R;
-import com.example.popularmovies.retrofit.callbacks.MoviesResultsCallback;
+import com.example.popularmovies.retrofit.callbacks.RetrofitResultsCallback;
+import com.example.popularmovies.retrofit.callbacks.RetrofitResult;
 import com.example.popularmovies.retrofit.models.Movie;
 import com.example.popularmovies.retrofit.models.MoviesList;
 import com.example.popularmovies.retrofit.models.RequestResult;
+import com.example.popularmovies.retrofit.models.Review;
 import com.example.popularmovies.retrofit.models.ReviewsResults;
-import com.example.popularmovies.retrofit.callbacks.RetrofitResult.MoviesListResult;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -17,6 +18,8 @@ import java.util.List;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -28,10 +31,11 @@ public class RetrofitUtil {
     private final String mApiKey;
     private final TheMovieDbService mService;
     private Call<MoviesList> mRequest;
-    private MoviesResultsCallback moviesListCallback;
+    private RetrofitResultsCallback<MoviesList> moviesListCallback;
 
     //live data
     private MutableLiveData<RequestResult<List<Movie>>> mMoviesListLiveData = new MutableLiveData<>();
+    private MutableLiveData<RequestResult<List<Review>>> mMovieReviewsLiveData = new MutableLiveData<>();
 
     private boolean mIsPopularRequestInProgress = false;
     private boolean mIsTopRatedRequestInProgress = false;
@@ -41,11 +45,12 @@ public class RetrofitUtil {
         mApiKey = getApiKey(context);
         mService = retrofit.create(TheMovieDbService.class);
 
-        moviesListCallback = new MoviesResultsCallback(new MoviesListResult() {
+        moviesListCallback = new RetrofitResultsCallback<>(new RetrofitResult<MoviesList>() {
             @Override
-            public void onMoviesListResult(List<Movie> moviesList) {
-                RequestResult<List<Movie>> result = new RequestResult<>(moviesList);
-                mMoviesListLiveData.postValue(result);
+            public void onResult(MoviesList result) {
+                List<Movie> moviesList = result.getMovies();
+                RequestResult<List<Movie>> results = new RequestResult<>(moviesList);
+                mMoviesListLiveData.postValue(results);
             }
 
             @Override
@@ -92,9 +97,21 @@ public class RetrofitUtil {
         mIsTopRatedRequestInProgress = true;
     }
 
-    public void enqueReviewsById(long movieId){
+    public void requestReviewsById(long movieId){
         Call<ReviewsResults> request = mService.getReviewsById(mApiKey, movieId);
-//        request.enqueue(this);
+
+        Callback<ReviewsResults> reviewsCallback = new Callback<ReviewsResults>() {
+            @Override
+            public void onResponse(Call<ReviewsResults> call, Response<ReviewsResults> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<ReviewsResults> call, Throwable t) {
+
+            }
+        };
+        request.enqueue(reviewsCallback);
     }
 
     private void cancelCurrentRequest() {
