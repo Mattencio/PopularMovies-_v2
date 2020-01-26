@@ -1,4 +1,4 @@
-package com.example.popularmovies.retrofit;
+package com.example.popularmovies.retrofit.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

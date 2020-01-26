@@ -1,13 +1,20 @@
 package com.example.popularmovies.retrofit;
 
+import com.example.popularmovies.retrofit.models.MoviesList;
+import com.example.popularmovies.retrofit.models.ReviewsResults;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 interface TheMovieDbService {
-    @GET("3/movie/popular?")
-    Call<MovieResults> getPopularMovies(@Query("api_key") String key);
+    @GET("popular?")
+    Call<MoviesList> getPopularMovies(@Query("api_key") String key);
 
-    @GET("3/movie/top_rated?")
-    Call<MovieResults> getTopRatedMovies(@Query("api_key") String key);
+    @GET("top_rated?")
+    Call<MoviesList> getTopRatedMovies(@Query("api_key") String key);
+
+    @GET("{id}/reviews?")
+    Call<ReviewsResults> getReviewsById(@Query("api_key") String key, @Path("id") Long id);
 }

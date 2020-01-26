@@ -2,30 +2,32 @@ package com.example.popularmovies;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.popularmovies.retrofit.Movie;
-import com.example.popularmovies.retrofit.RetrofitUtil;
+import com.example.popularmovies.retrofit.models.Movie;
+import com.example.popularmovies.viewmodel.MainViewModel;
 
 import java.util.List;
 
 import static com.example.popularmovies.MovieDetailsActivity.MOVIE_DETAILS;
 
-public class MainActivity extends AppCompatActivity implements RetrofitUtil.MoviesListResult, MoviesListAdapter.ItemTouchedListener {
+public class MainActivity extends AppCompatActivity implements MoviesListAdapter.ItemTouchedListener {
 
     //Variables
-    private RetrofitUtil mRetrofitUtil;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressBar;
+    private MainViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,22 @@ public class MainActivity extends AppCompatActivity implements RetrofitUtil.Movi
         setContentView(R.layout.activity_main);
 
         initUI();
+        initViewModel();
+        showPopularMovies();
+    }
+
+    private void initViewModel() {
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+        mViewModel.getMoviesList().observe(this, requestResult -> {
+            if (requestResult.IsSuccessful) {
+                List<Movie> result = requestResult.getResult();
+                updateMoviesRecyclerUI(result);
+            } else {
+                Throwable error = requestResult.getError();
+                showError(error);
+            }
+        });
     }
 
     private void initUI() {
@@ -40,9 +58,6 @@ public class MainActivity extends AppCompatActivity implements RetrofitUtil.Movi
         mProgressBar = findViewById(R.id.progress_bar);
 
         mRecyclerView.setHasFixedSize(true);
-
-        mRetrofitUtil = new RetrofitUtil(getApplicationContext());
-        showPopularMovies();
     }
 
     @Override
@@ -71,13 +86,14 @@ public class MainActivity extends AppCompatActivity implements RetrofitUtil.Movi
     private void showRatedMovies() {
         setLoadingVisibility(true);
         setRecyclerVisibility(false);
-        mRetrofitUtil.enqueueTopRatedMovies(this);
+        mViewModel.requestTopRatedMovies();
     }
 
     private void showPopularMovies() {
         setLoadingVisibility(true);
         setRecyclerVisibility(false);
-        mRetrofitUtil.enqueuePopularMovies(this);
+        mViewModel.requestPopularMovies();
+
     }
 
     private void setRecyclerViewAdapter(MoviesListAdapter newAdapter) {
@@ -109,15 +125,13 @@ public class MainActivity extends AppCompatActivity implements RetrofitUtil.Movi
         startActivity(intent);
     }
 
-    @Override
-    public void onMoviesListResult(List<Movie> moviesList) {
+    public void updateMoviesRecyclerUI(List<Movie> moviesList) {
         final MoviesListAdapter adapter = new MoviesListAdapter(moviesList, MainActivity.this);
         setRecyclerViewAdapter(adapter);
         setLoadingVisibility(false);
     }
 
-    @Override
-    public void onError(Throwable error) {
+    public void showError(Throwable error) {
         error.printStackTrace();
         setLoadingVisibility(false);
         final String errorMessage = error.getMessage();

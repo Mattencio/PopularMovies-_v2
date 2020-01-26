@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.popularmovies.picasso.PicassoUtil;
-import com.example.popularmovies.retrofit.Movie;
+import com.example.popularmovies.retrofit.models.Movie;
 
 import java.util.List;
 

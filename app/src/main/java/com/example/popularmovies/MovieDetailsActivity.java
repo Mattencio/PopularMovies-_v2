@@ -7,7 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.popularmovies.picasso.PicassoUtil;
-import com.example.popularmovies.retrofit.Movie;
+import com.example.popularmovies.retrofit.models.Movie;
 
 public class MovieDetailsActivity extends AppCompatActivity {
     //Constants
