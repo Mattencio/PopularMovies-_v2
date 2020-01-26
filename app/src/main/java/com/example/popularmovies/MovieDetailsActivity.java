@@ -1,6 +1,7 @@
 package com.example.popularmovies;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.example.popularmovies.picasso.PicassoUtil;
 import com.example.popularmovies.retrofit.models.Movie;
+import com.example.popularmovies.viewmodel.MovieDetailsViewModel;
 
 public class MovieDetailsActivity extends AppCompatActivity {
     //Constants
@@ -15,6 +17,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     //Variables
     private Movie mMovie;
+    private MovieDetailsViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
 
         populateUI();
+        initViewModel();
+    }
+
+    private void initViewModel() {
+        mViewModel = ViewModelProviders.of(this).get(MovieDetailsViewModel.class);
     }
 
     private void populateUI() {

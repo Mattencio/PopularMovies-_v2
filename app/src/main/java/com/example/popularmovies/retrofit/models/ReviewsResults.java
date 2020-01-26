@@ -9,4 +9,8 @@ public class ReviewsResults {
     @Expose
     @SerializedName("results")
     private List<Review> mReviews;
+
+    public List<Review> getReviews() {
+        return mReviews;
+    }
 }
