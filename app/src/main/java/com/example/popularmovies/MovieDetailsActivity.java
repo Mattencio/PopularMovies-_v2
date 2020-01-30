@@ -36,22 +36,22 @@ public class MovieDetailsActivity extends AppCompatActivity {
             finish();
         }
 
+        initViewModel();
         initUI();
         populateUI();
-        initViewModel();
     }
 
     private void initUI() {
+        mViewModel.getReviews().observe(this, reviewsResult -> {
+            if (reviewsResult.IsSuccessful){
+                List<Review> reviews = reviewsResult.getResult();
+                ReviewsDialog dialog = ReviewsDialog.newInstance(reviews);
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                dialog.show(fragmentManager, "reviews");
+            }
+        });
         mButtonShowReviews = findViewById(R.id.button_show_reviews);
         mButtonShowReviews.setOnClickListener(v -> {
-            mViewModel.getReviews().observe(this, reviewsResult -> {
-                if (reviewsResult.IsSuccessful){
-                    List<Review> reviews = reviewsResult.getResult();
-                    ReviewsDialog dialog = ReviewsDialog.newInstance(reviews);
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    dialog.show(fragmentManager, "reviews");
-                }
-            });
             long movieId = mMovie.getId();
             mViewModel.requestMovieReviewsById(movieId);
         });
