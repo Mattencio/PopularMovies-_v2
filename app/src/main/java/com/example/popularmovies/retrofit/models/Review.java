@@ -10,4 +10,12 @@ public class Review {
     @Expose
     @SerializedName("content")
     private String mContent;
+
+    public String getAuthor() {
+        return mAuthor;
+    }
+
+    public String getContent() {
+        return mContent;
+    }
 }

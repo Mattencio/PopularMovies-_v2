@@ -16,5 +16,5 @@ interface TheMovieDbService {
     Call<MoviesList> getTopRatedMovies(@Query("api_key") String key);
 
     @GET("{id}/reviews?")
-    Call<ReviewsResults> getReviewsById(@Query("api_key") String key, @Path("id") Long id);
+    Call<ReviewsResults> getReviewsById(@Path("id") Long id, @Query("api_key") String key);
 }

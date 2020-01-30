@@ -22,6 +22,9 @@ public class Movie implements Parcelable {
     @Expose
     @SerializedName("overview")
     private String mSynopsis;
+    @Expose
+    @SerializedName("id")
+    private Long mId;
 
     protected Movie(Parcel in) {
         mTitle = in.readString();
@@ -33,6 +36,11 @@ public class Movie implements Parcelable {
             mVoteAverage = in.readFloat();
         }
         mSynopsis = in.readString();
+        if (in.readByte() == 0) {
+            mId = null;
+        } else {
+            mId = in.readLong();
+        }
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -67,6 +75,10 @@ public class Movie implements Parcelable {
         return mSynopsis;
     }
 
+    public Long getId() {
+        return mId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -84,5 +96,11 @@ public class Movie implements Parcelable {
             dest.writeFloat(mVoteAverage);
         }
         dest.writeString(mSynopsis);
+        if (mId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(mId);
+        }
     }
 }

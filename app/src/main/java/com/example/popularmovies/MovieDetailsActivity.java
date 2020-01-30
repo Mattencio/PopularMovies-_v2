@@ -1,21 +1,27 @@
 package com.example.popularmovies;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.popularmovies.picasso.PicassoUtil;
 import com.example.popularmovies.retrofit.models.Movie;
+import com.example.popularmovies.retrofit.models.Review;
 import com.example.popularmovies.viewmodel.MovieDetailsViewModel;
+
+import java.util.List;
 
 public class MovieDetailsActivity extends AppCompatActivity {
     //Constants
     public final static String MOVIE_DETAILS = "MOVIE_DETAILS";
 
     //Variables
+    private Button mButtonShowReviews;
     private Movie mMovie;
     private MovieDetailsViewModel mViewModel;
 
@@ -30,8 +36,25 @@ public class MovieDetailsActivity extends AppCompatActivity {
             finish();
         }
 
+        initUI();
         populateUI();
         initViewModel();
+    }
+
+    private void initUI() {
+        mButtonShowReviews = findViewById(R.id.button_show_reviews);
+        mButtonShowReviews.setOnClickListener(v -> {
+            mViewModel.getReviews().observe(this, reviewsResult -> {
+                if (reviewsResult.IsSuccessful){
+                    List<Review> reviews = reviewsResult.getResult();
+                    ReviewsDialog dialog = ReviewsDialog.newInstance(reviews);
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    dialog.show(fragmentManager, "reviews");
+                }
+            });
+            long movieId = mMovie.getId();
+            mViewModel.requestMovieReviewsById(movieId);
+        });
     }
 
     private void initViewModel() {

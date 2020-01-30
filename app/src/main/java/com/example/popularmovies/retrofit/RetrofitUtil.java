@@ -120,7 +120,7 @@ public class RetrofitUtil {
     }
 
     public void requestReviewsById(long movieId){
-        Call<ReviewsResults> request = mService.getReviewsById(mApiKey, movieId);
+        Call<ReviewsResults> request = mService.getReviewsById(movieId, mApiKey);
         request.enqueue(mReviewsListCallback);
     }
 
