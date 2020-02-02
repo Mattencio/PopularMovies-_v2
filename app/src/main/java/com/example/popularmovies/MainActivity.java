@@ -18,6 +18,7 @@ import com.example.popularmovies.retrofit.models.Movie;
 import com.example.popularmovies.viewmodel.MainViewModel;
 import com.example.popularmovies.views.MovieDetailsActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.popularmovies.views.MovieDetailsActivity.MOVIE_DETAILS;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements MoviesListAdapter
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressBar;
     private MainViewModel mViewModel;
+    private MoviesListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +47,19 @@ public class MainActivity extends AppCompatActivity implements MoviesListAdapter
         mViewModel.getMoviesList().observe(this, requestResult -> {
             if (requestResult.IsSuccessful) {
                 List<Movie> result = requestResult.getResult();
-                updateMoviesRecyclerUI(result);
+                updateMoviesByList(result);
             } else {
                 Throwable error = requestResult.getError();
+                showError(error);
+            }
+        });
+
+        mViewModel.getFavoritesMoviesItemByItem().observe(this, movieResult -> {
+            if (movieResult.IsSuccessful) {
+                Movie movie = movieResult.getResult();
+                updateMoviesByItem(movie);
+            } else {
+                Throwable error = movieResult.getError();
                 showError(error);
             }
         });
@@ -77,23 +89,38 @@ public class MainActivity extends AppCompatActivity implements MoviesListAdapter
             case R.id.show_rated:
                 showRatedMovies();
                 break;
+            case R.id.show_favorites:
+                showFavoriteMovies();
+                break;
             default:
         }
 
         return true;
     }
 
+    private void showFavoriteMovies() {
+        loadingMoviesUI();
+        mAdapter = null;
+        mViewModel.getFavoriteMoviesEntities().observe(this, movieEntities -> {
+            if (movieEntities != null) {
+                mViewModel.requestFavoriteMoviesByList(movieEntities);
+            }
+        });
+    }
+
     private void showRatedMovies() {
-        setLoadingVisibility(true);
-        setRecyclerVisibility(false);
+        loadingMoviesUI();
         mViewModel.requestTopRatedMovies();
     }
 
     private void showPopularMovies() {
+        loadingMoviesUI();
+        mViewModel.requestPopularMovies();
+    }
+
+    private void loadingMoviesUI() {
         setLoadingVisibility(true);
         setRecyclerVisibility(false);
-        mViewModel.requestPopularMovies();
-
     }
 
     private void setRecyclerViewAdapter(MoviesListAdapter newAdapter) {
@@ -125,9 +152,21 @@ public class MainActivity extends AppCompatActivity implements MoviesListAdapter
         startActivity(intent);
     }
 
-    public void updateMoviesRecyclerUI(List<Movie> moviesList) {
-        final MoviesListAdapter adapter = new MoviesListAdapter(moviesList, MainActivity.this);
-        setRecyclerViewAdapter(adapter);
+    public void updateMoviesByList(List<Movie> moviesList) {
+        mAdapter = new MoviesListAdapter(moviesList, MainActivity.this);
+        setRecyclerViewAdapter(mAdapter);
+        setLoadingVisibility(false);
+    }
+
+    public void updateMoviesByItem(Movie movie) {
+        if (mAdapter == null) {
+            List<Movie> movies = new ArrayList<>();
+            movies.add(movie);
+            mAdapter = new MoviesListAdapter(movies, MainActivity.this);
+        } else {
+            mAdapter.addMovie(movie);
+        }
+        setRecyclerViewAdapter(mAdapter);
         setLoadingVisibility(false);
     }
 

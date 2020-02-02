@@ -32,6 +32,12 @@ public class MoviesListAdapter extends RecyclerView.Adapter<MoviesListAdapter.Mo
         mPicassoUtil = new PicassoUtil();
     }
 
+    public void addMovie(Movie movie) {
+        mMoviesList.add(movie);
+        final int positionAdded = mMoviesList.size() - 1;
+        notifyItemInserted(positionAdded);
+    }
+
     @NonNull
     @Override
     public MoviesListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

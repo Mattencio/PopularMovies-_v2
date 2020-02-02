@@ -1,5 +1,6 @@
 package com.example.popularmovies.retrofit;
 
+import com.example.popularmovies.retrofit.models.Movie;
 import com.example.popularmovies.retrofit.models.MoviesList;
 import com.example.popularmovies.retrofit.models.ReviewsResults;
 import com.example.popularmovies.retrofit.models.TrailersResults;
@@ -21,4 +22,7 @@ interface TheMovieDbService {
 
     @GET("{id}/videos")
     Call<TrailersResults> getTrailersById(@Path("id") Long id, @Query("api_key") String key);
+
+    @GET("{id}")
+    Call<Movie> getMovieDetailsById(@Path("id") Long id, @Query("api_key") String key);
 }

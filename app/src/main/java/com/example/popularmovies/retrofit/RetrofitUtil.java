@@ -31,6 +31,7 @@ public class RetrofitUtil {
     private final String mApiKey;
     private final TheMovieDbService mService;
     private Call<MoviesList> mRequest;
+    //Callbacks
     private RetrofitResultsCallback<MoviesList> mMoviesListCallback;
     private RetrofitResultsCallback<ReviewsResults> mReviewsListCallback;
     private RetrofitResultsCallback<TrailersResults> mTrailersListCallback;
@@ -39,6 +40,7 @@ public class RetrofitUtil {
     private MutableLiveData<RequestResult<List<Movie>>> mMoviesListLiveData = new MutableLiveData<>();
     private MutableLiveData<RequestResult<List<Review>>> mMovieReviewsLiveData = new MutableLiveData<>();
     private MutableLiveData<RequestResult<List<Trailer>>> mMovieTrailersLiveData = new MutableLiveData<>();
+    private MutableLiveData<RequestResult<Movie>> mMovieByItemLiveData = new MutableLiveData<>();
 
     private boolean mIsPopularRequestInProgress = false;
     private boolean mIsTopRatedRequestInProgress = false;
@@ -58,12 +60,14 @@ public class RetrofitUtil {
                 List<Movie> moviesList = result.getMovies();
                 RequestResult<List<Movie>> results = new RequestResult<>(moviesList);
                 mMoviesListLiveData.postValue(results);
+                requestFinished();
             }
 
             @Override
             public void onError(Throwable error) {
                 RequestResult<List<Movie>> result = new RequestResult<>(error);
                 mMoviesListLiveData.postValue(result);
+                requestFinished();
             }
         });
 
@@ -107,9 +111,7 @@ public class RetrofitUtil {
             return;
         }
 
-        if (mIsTopRatedRequestInProgress) {
-            cancelCurrentRequest();
-        }
+        cancelCurrentRequest();
 
         mRequest = mService.getPopularMovies(mApiKey);
         mRequest.enqueue(mMoviesListCallback);
@@ -128,14 +130,16 @@ public class RetrofitUtil {
         return mMovieTrailersLiveData;
     }
 
+    public LiveData<RequestResult<Movie>> getMovieByItem() {
+        return mMovieByItemLiveData;
+    }
+
     public void requestTopRatedMovies() {
         if (mIsTopRatedRequestInProgress) {
             return;
         }
 
-        if (mIsPopularRequestInProgress) {
-            cancelCurrentRequest();
-        }
+        cancelCurrentRequest();
 
         Call<MoviesList> request = mService.getTopRatedMovies(mApiKey);
         request.enqueue(mMoviesListCallback);
@@ -152,9 +156,32 @@ public class RetrofitUtil {
         request.enqueue(mTrailersListCallback);
     }
 
+    public void requestMoviesDetailsByIds(List<Long> moviesIds) {
+        cancelCurrentRequest();
+
+        for (Long movieId : moviesIds) {
+            Call<Movie> request = mService.getMovieDetailsById(movieId, mApiKey);
+            request.enqueue(new RetrofitResultsCallback<>(new RetrofitResult<Movie>() {
+                @Override
+                public void onResult(Movie result) {
+                    RequestResult<Movie> movieResult = new RequestResult<>(result);
+                    mMovieByItemLiveData.setValue(movieResult);
+                }
+
+                @Override
+                public void onError(Throwable error) {
+                    RequestResult<Movie> result = new RequestResult<>(error);
+                    mMovieByItemLiveData.postValue(result);
+                }
+            }));
+        }
+    }
+
     private void cancelCurrentRequest() {
-        mRequest.cancel();
-        requestFinished();
+        if (mRequest != null) {
+            mRequest.cancel();
+            requestFinished();
+        }
     }
 
     private Retrofit getRetrofit() {
