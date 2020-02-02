@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,10 +16,11 @@ import android.widget.Toast;
 
 import com.example.popularmovies.retrofit.models.Movie;
 import com.example.popularmovies.viewmodel.MainViewModel;
+import com.example.popularmovies.views.MovieDetailsActivity;
 
 import java.util.List;
 
-import static com.example.popularmovies.MovieDetailsActivity.MOVIE_DETAILS;
+import static com.example.popularmovies.views.MovieDetailsActivity.MOVIE_DETAILS;
 
 public class MainActivity extends AppCompatActivity implements MoviesListAdapter.ItemTouchedListener {
 

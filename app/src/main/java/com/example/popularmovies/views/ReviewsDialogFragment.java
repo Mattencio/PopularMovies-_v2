@@ -1,4 +1,4 @@
-package com.example.popularmovies;
+package com.example.popularmovies.views;
 
 
 import android.os.Bundle;
@@ -10,24 +10,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.popularmovies.R;
+import com.example.popularmovies.ReviewsListAdapter;
 import com.example.popularmovies.retrofit.models.Review;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class ReviewsDialog extends DialogFragment {
+public class ReviewsDialogFragment extends DialogFragment {
 
     private static final String REVIEWS_PARAM = "REVIEWS_PARAM";
 
     private List<Review> mReviews;
     private ReviewsListAdapter mAdapter;
 
-    public ReviewsDialog() {
+    public ReviewsDialogFragment() {
         // Required empty public constructor
     }
 
-    public static ReviewsDialog newInstance(List<Review> reviews) {
-        ReviewsDialog fragment = new ReviewsDialog();
+    public static ReviewsDialogFragment newInstance(List<Review> reviews) {
+        ReviewsDialogFragment fragment = new ReviewsDialogFragment();
         Bundle args = new Bundle();
         args.putSerializable(REVIEWS_PARAM, (Serializable) reviews);
         fragment.setArguments(args);

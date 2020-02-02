@@ -10,6 +10,8 @@ import com.example.popularmovies.retrofit.models.MoviesList;
 import com.example.popularmovies.retrofit.models.RequestResult;
 import com.example.popularmovies.retrofit.models.Review;
 import com.example.popularmovies.retrofit.models.ReviewsResults;
+import com.example.popularmovies.retrofit.models.Trailer;
+import com.example.popularmovies.retrofit.models.TrailersResults;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -31,10 +33,12 @@ public class RetrofitUtil {
     private Call<MoviesList> mRequest;
     private RetrofitResultsCallback<MoviesList> mMoviesListCallback;
     private RetrofitResultsCallback<ReviewsResults> mReviewsListCallback;
+    private RetrofitResultsCallback<TrailersResults> mTrailersListCallback;
 
     //live data
     private MutableLiveData<RequestResult<List<Movie>>> mMoviesListLiveData = new MutableLiveData<>();
     private MutableLiveData<RequestResult<List<Review>>> mMovieReviewsLiveData = new MutableLiveData<>();
+    private MutableLiveData<RequestResult<List<Trailer>>> mMovieTrailersLiveData = new MutableLiveData<>();
 
     private boolean mIsPopularRequestInProgress = false;
     private boolean mIsTopRatedRequestInProgress = false;
@@ -77,6 +81,21 @@ public class RetrofitUtil {
                 mMovieReviewsLiveData.postValue(result);
             }
         });
+
+        mTrailersListCallback = new RetrofitResultsCallback<>(new RetrofitResult<TrailersResults>() {
+            @Override
+            public void onResult(TrailersResults result) {
+                List<Trailer> trailers = result.getTrailersList();
+                RequestResult<List<Trailer>> results = new RequestResult<>(trailers);
+                mMovieTrailersLiveData.postValue(results);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                RequestResult<List<Trailer>> result = new RequestResult<>(error);
+                mMovieTrailersLiveData.postValue(result);
+            }
+        });
     }
 
     private String getApiKey(Context context) {
@@ -105,6 +124,10 @@ public class RetrofitUtil {
         return mMovieReviewsLiveData;
     }
 
+    public LiveData<RequestResult<List<Trailer>>> getTrailers() {
+        return mMovieTrailersLiveData;
+    }
+
     public void requestTopRatedMovies() {
         if (mIsTopRatedRequestInProgress) {
             return;
@@ -122,6 +145,11 @@ public class RetrofitUtil {
     public void requestReviewsById(long movieId){
         Call<ReviewsResults> request = mService.getReviewsById(movieId, mApiKey);
         request.enqueue(mReviewsListCallback);
+    }
+
+    public void requestMovieTrailersById(long movieId){
+        Call<TrailersResults> request = mService.getTrailersById(movieId, mApiKey);
+        request.enqueue(mTrailersListCallback);
     }
 
     private void cancelCurrentRequest() {
